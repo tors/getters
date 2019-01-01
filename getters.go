@@ -38,7 +38,7 @@ func init() {
 	flag.StringVar(&suffix, "sf", "", "suffix file name (default: getters.go)")
 	flag.Var(&structs, "s", "ignore structs")
 	flag.Var(&methods, "m", "ignore struct methods")
-	flag.Var(&packages, "p", "ignore struct packages")
+	flag.Var(&packages, "p", "ignore packages")
 	flag.BoolVar(&verbose, "v", false, "verbose mode")
 
 	flag.Usage = func() {
