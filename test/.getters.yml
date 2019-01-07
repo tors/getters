@@ -1,7 +1,0 @@
-suffix: _gen.go
-ignore_structs:
-  - Kitten
-ignore_methods:
-  - Pony.GetWeight
-ignore_packages:
-  - main

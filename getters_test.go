@@ -9,24 +9,25 @@ import (
 )
 
 func TestTmpl(t *testing.T) {
-	ignore := &ignoreyml{
-		Suffix:  "_gen_getters.go",
-		Structs: []string{"Kitten"},
-		Methods: []string{"Pony.GetWeight"},
-	}
+	suffix := "_gen.go"
 
 	fset := token.NewFileSet()
-
-	pkgs, err := parser.ParseDir(fset, "./test", sourceFilter(ignore.Suffix), 0)
+	pkgs, err := parser.ParseDir(fset, "./testpkg", sourceFilter(suffix), 0)
 	if err != nil {
 		t.Errorf("parser.ParseDir returned an error %v", err)
 	}
 
 	for pkgName, pkg := range pkgs {
 		tmpl := &Tmpl{
-			filename: pkgName + ignore.Suffix,
+			filename: pkgName + suffix,
 			Package:  pkgName,
 			Imports:  make(map[string]string),
+			ignoreStructs: map[string]bool{
+				"Pony": true,
+			},
+			ignoreMethods: map[string]bool{
+				"Narwhal.GetAge": true,
+			},
 		}
 
 		for _, f := range pkg.Files {
@@ -36,33 +37,35 @@ func TestTmpl(t *testing.T) {
 		}
 
 		getters := []*getter{
-			newGetter("Pony", "Name", "string", `""`, false),
-			newGetter("Pony", "Age", "int64", "0", false),
-			newGetter("Pony", "Weight", "float64", "0.0", false),
-			newGetter("Kitten", "Name", "string", `""`, false),
+			newGetter("Narwhal", "Name", "string", `""`, false),
+			newGetter("Narwhal", "Horn", "Horn", "nil", true),
+			newGetter("Horn", "Length", "float64", "0", false),
+			newGetter("Horn", "Color", "string", `""`, false),
 		}
 
-		if !cmp.Equal(tmpl.Getters, getters) {
-			t.Errorf("Tmpl.Getters got %v, want %v", tmpl.Getters, getters)
+		if diff := cmp.Diff(tmpl.Getters, getters); diff != "" {
+			t.Errorf("Tmpl.Getters (+got -want)\n%s", diff)
 		}
 
-		if tmpl.filename != tmpl.Package+ignore.Suffix {
-			t.Errorf("Tmpl.filename got %v, want %v", tmpl.filename, tmpl.Package+ignore.Suffix)
+		if tmpl.filename != tmpl.Package+suffix {
+			t.Errorf("Tmpl.filename got %v, want %v", tmpl.filename, tmpl.Package+suffix)
 		}
 	}
 }
 
-func TestGetYMLConfig(t *testing.T) {
-	ignore := getYMLConfig([]string{"test/.getters.yml"})
+func TestGetConfigFile(t *testing.T) {
+	conf := getConfigFile([]string{"testpkg/.getters.yml"})
 
-	want := &ignoreyml{
-		Suffix:   "_gen.go",
-		Structs:  []string{"Kitten"},
-		Methods:  []string{"Pony.GetWeight"},
-		Packages: []string{"main"},
+	want := &ConfigFile{
+		Suffix: "_gen.go",
+		Ignore: &ignore{
+			Structs:  []string{"Pony"},
+			Methods:  []string{"Narwhal.GetAge"},
+			Packages: []string{"main"},
+		},
 	}
 
-	if !cmp.Equal(ignore, want) {
-		t.Errorf("ignoreyml returned %v, want %v", ignore, want)
+	if diff := cmp.Diff(conf, want); diff != "" {
+		t.Errorf("ConfigFile (+got -want)\n%s", diff)
 	}
 }

@@ -1,0 +1,8 @@
+suffix: _gen.go
+ignore:
+  structs:
+    - Pony
+  methods:
+    - Narwhal.GetAge
+  packages:
+    - main

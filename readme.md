@@ -33,7 +33,7 @@ func (p *Pony) GetName() string {
 ```
 
 ## Install
-```
+```bash
 go get -u github.com/tors/getters
 ```
 
@@ -53,7 +53,7 @@ getters -v custom_getters.yml
 # Merge and override options
 getters -v -s Pony,Kitten -m Horse.GetName,Cat.GetAge
 
-# Ignore main packages
+# Ignore main package
 getters -p main
 ```
 
@@ -66,13 +66,4 @@ getters -p main
 //go:generate getters -v -s Pony,Kitten -m Horse.GetName,Cat.GetAge
 ```
 
-### YAML config
-```yaml
-suffix: _generated.go
-ignore_structs:
-  - Kitten
-ignore_methods:
-  - Pony.GetWeight
-ignore_packages:
-  - main
-```
+Here's an example of a [config file](https://github.com/tors/getters/blob/master/testpkg/.getters.yml)
